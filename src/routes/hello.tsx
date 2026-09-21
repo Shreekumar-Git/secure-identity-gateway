@@ -30,7 +30,7 @@ function HelloPage() {
     void supabase.auth.getUser().then(({ data }) => {
       if (!active) return;
       if (!data.user) {
-        void navigate({ to: "/login", replace: true });
+        void navigate({ to: "/login", search: { registered: false }, replace: true });
         return;
       }
       setEmail(data.user.email ?? "your account");
@@ -43,7 +43,7 @@ function HelloPage() {
 
   async function handleLogout() {
     await supabase.auth.signOut();
-    await navigate({ to: "/login", replace: true });
+    await navigate({ to: "/login", search: { registered: false }, replace: true });
   }
 
   if (isLoading) {

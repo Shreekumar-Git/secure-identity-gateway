@@ -19,7 +19,7 @@ function Index() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    void navigate({ to: "/login", replace: true });
+    void navigate({ to: "/login", search: { registered: false }, replace: true });
   }, [navigate]);
 
   return (

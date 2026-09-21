@@ -4,7 +4,7 @@ import { AuthShell } from "@/components/auth-shell";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    registered: search.registered === true || search.registered === "true",
+    registered: search["registered"] === true || search["registered"] === "true",
   }),
   head: () => ({
     meta: [
