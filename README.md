@@ -51,3 +51,5 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+<img width="1099" height="614" alt="Architecture diagram" src="https://github.com/user-attachments/assets/9a617c82-3a3a-4418-b31d-49b4b47070c3" />
+
