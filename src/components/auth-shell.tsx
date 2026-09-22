@@ -19,9 +19,7 @@ function getAuthErrorMessage(message: string) {
   const normalized = message.toLowerCase();
   if (normalized.includes("invalid login credentials")) return "The email or password is incorrect.";
   if (normalized.includes("user already registered")) return "An account with this email already exists.";
-  if (normalized.includes("email not confirmed")) return "Please confirm your email before logging in.";
   if (normalized.includes("password should be at least")) return "Your password does not meet the minimum length.";
-  if (normalized.includes("weak") || normalized.includes("easy to guess")) return "That password is too weak or has appeared in a data breach. Please choose a stronger one.";
   return "Something went wrong. Please try again.";
 }
 
@@ -125,7 +123,6 @@ export function AuthShell({ mode, registered = false }: AuthShellProps) {
       ? await supabase.auth.signUp({
           email: normalizedEmail,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/login` },
         })
       : await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
 
@@ -136,8 +133,7 @@ export function AuthShell({ mode, registered = false }: AuthShellProps) {
     }
 
     if (isSignup) {
-      if (result.data.session) await supabase.auth.signOut();
-      await navigate({ to: "/login", search: { registered: true }, replace: true });
+      await navigate({ to: "/hello", replace: true });
     } else {
       await navigate({ to: "/hello", replace: true });
     }
@@ -182,7 +178,7 @@ export function AuthShell({ mode, registered = false }: AuthShellProps) {
               {registered ? (
                 <div className="mb-5 flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-foreground">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                  <p>Account created. Check your email to confirm your account, then log in.</p>
+                   <p>Account created. You can now log in.</p>
                 </div>
               ) : null}
               {error ? (
