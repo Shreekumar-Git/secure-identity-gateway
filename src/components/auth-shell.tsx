@@ -21,6 +21,7 @@ function getAuthErrorMessage(message: string) {
   if (normalized.includes("user already registered")) return "An account with this email already exists.";
   if (normalized.includes("email not confirmed")) return "Please confirm your email before logging in.";
   if (normalized.includes("password should be at least")) return "Your password does not meet the minimum length.";
+  if (normalized.includes("weak") || normalized.includes("easy to guess")) return "That password is too weak or has appeared in a data breach. Please choose a stronger one.";
   return "Something went wrong. Please try again.";
 }
 
