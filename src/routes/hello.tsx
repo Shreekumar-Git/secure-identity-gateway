@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, LogOut, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, Download, Loader2, LogOut, ShieldCheck } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { generateRegisteredUsersPdf } from "@/lib/registered-users-pdf.functions";
 
 export const Route = createFileRoute("/hello")({
   head: () => ({
@@ -22,8 +24,11 @@ export const Route = createFileRoute("/hello")({
 
 function HelloPage() {
   const navigate = useNavigate();
+  const generatePdf = useServerFn(generateRegisteredUsersPdf);
   const [email, setEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -46,6 +51,35 @@ function HelloPage() {
     await navigate({ to: "/login", search: { registered: false }, replace: true });
   }
 
+  async function handleDownloadUsersPdf() {
+    setPdfError(null);
+    setIsGeneratingPdf(true);
+
+    try {
+      const result = await generatePdf();
+      const binary = window.atob(result.data);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+
+      const url = URL.createObjectURL(new Blob([bytes], { type: result.contentType }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download registered users PDF", error);
+      setPdfError("We could not generate the PDF right now. Please try again.");
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  }
+
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-muted/40 text-sm text-muted-foreground">Checking your session…</div>;
   }
@@ -60,10 +94,16 @@ function HelloPage() {
             </span>
             Secure access
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOut className="size-4" />
-            Log out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleDownloadUsersPdf} disabled={isGeneratingPdf}>
+              {isGeneratingPdf ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              {isGeneratingPdf ? "Generating PDF…" : "Download users PDF"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="size-4" />
+              Log out
+            </Button>
+          </div>
         </header>
         <section className="flex flex-1 items-center justify-center px-5 py-16 sm:px-8">
           <Card className="w-full max-w-xl border-0 shadow-none">
@@ -83,6 +123,11 @@ function HelloPage() {
                 </div>
                 <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
               </div>
+              {pdfError ? (
+                <p className="mt-4 text-sm text-destructive" role="alert">
+                  {pdfError}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
         </section>
