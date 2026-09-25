@@ -1,0 +1,3 @@
+- [ ] Add authenticated Papermill PDF generation for registered users.
+- [ ] Add the download control to the existing authenticated home view.
+- [ ] Verify generation, download behavior, and build health.
